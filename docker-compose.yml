@@ -19,10 +19,11 @@ services:
       - "company-bulletin-board:sc.servicecomb.io"
       - "zipkin:zipkin.io"
     environment:
+      - JAVA_OPTS="-Dcse.service.registry.address=http://sc.servicecomb.io:30100"
       - ARTIFACT_ID=worker
     ports:
       - "7070:7070"
-      - "8080:8080"
+      - "8080:9091"
     healthcheck:
         test: ["CMD-SHELL", "nc -z localhost 7070 &> /dev/null; echo $$?"]
         interval: 30s
@@ -36,10 +37,10 @@ services:
       - "company-bulletin-board:sc.servicecomb.io"
       - "zipkin:zipkin.io"
     environment:
-      - JAVA_OPTS=-Dcompany.auth.secret=someSecretKey
+      - JAVA_OPTS="-Dcompany.auth.secret=someSecretKey -Dcse.service.registry.address=http://sc.servicecomb.io:30100"
       - ARTIFACT_ID=doorman
     ports:
-      - "8081:8080"
+      - "8081:9092"
 
   company-beekeeper:
     image: "beekeeper:0.0.1-SNAPSHOT"
@@ -49,12 +50,13 @@ services:
       - "zipkin:zipkin.io"
       - "company-worker"
     environment:
+      - JAVA_OPTS="-Dcse.service.registry.address=http://sc.servicecomb.io:30100"
       - ARTIFACT_ID=beekeeper
     depends_on:
       company-worker:
         condition: service_healthy
     ports:
-      - "8082:8090"
+      - "8082:9093"
 
   company-manager:
     image: "manager:0.0.1-SNAPSHOT"
@@ -63,7 +65,7 @@ services:
       - "company-bulletin-board:sc.servicecomb.io"
       - "zipkin:zipkin.io"
     environment:
-      - JAVA_OPTS=-Dserver.port=8080 #-Dlogging.level.root=DEBUG
+      - JAVA_OPTS="-Dcse.service.registry.address=http://sc.servicecomb.io:30100"  #-Dlogging.level.root=DEBUG
       - ARTIFACT_ID=manager
     ports:
       - "8083:8080"
